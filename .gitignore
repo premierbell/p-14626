@@ -1,0 +1,31 @@
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+
+# Secret files
+backend/src/main/resources/application-secret.yml
+.env
+.env.properties
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend
+backend/build/
+backend/.gradle/
+backend/out/
+backend/bin/
+backend/db_dev*
+
+# Logs
+*.log

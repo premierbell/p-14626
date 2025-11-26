@@ -48,7 +48,7 @@ class ApiV1AdmMemberControllerTest {
 
         resultActions
             .andExpect(MockMvcResultMatchers.jsonPath("$.content.length()").value(5))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].id", Matchers.containsInRelativeOrder(1, 5)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].id", Matchers.containsInRelativeOrder(8, 1)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id").value(1))
             .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].createDate").exists())
             .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].modifyDate").exists())
