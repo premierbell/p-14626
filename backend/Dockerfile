@@ -13,4 +13,4 @@ RUN ./gradlew clean build -x test
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "-Dspring.profiles.active=prod", "build/libs/backend-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "-Dspring.profiles.active=prod", "build/libs/back-0.0.1-SNAPSHOT.jar"]
