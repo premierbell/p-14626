@@ -1,3 +1,4 @@
+# Spring Boot Application Configuration
 server:
   forward-headers-strategy: native
 
