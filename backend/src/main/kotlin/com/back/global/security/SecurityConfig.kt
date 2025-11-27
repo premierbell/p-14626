@@ -97,7 +97,13 @@ class SecurityConfig(
     fun corsConfigurationSource(): UrlBasedCorsConfigurationSource {
         val configuration = CorsConfiguration().apply {
             allowedOrigins =
-                listOf("https://cdpn.io", "http://localhost:3000")
+                listOf(
+                    "https://cdpn.io",
+                    "http://localhost:3000",
+                    "https://mypractice.store",
+                    "https://www.mypractice.store",
+                    "https://*.vercel.app"  // Vercel preview 배포도 허용
+                )
             allowedMethods =
                 listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
             allowedHeaders = listOf("*")
