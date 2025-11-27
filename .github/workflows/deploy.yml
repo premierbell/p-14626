@@ -57,7 +57,14 @@ jobs:
         env:
           ACTIONS_STEP_DEBUG: true
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
-        run: echo "$APPLICATION_SECRET" > src/main/resources/application-secret.yml
+        run: |
+          pwd
+          echo "$APPLICATION_SECRET" > src/main/resources/application-secret.yml
+          echo "✅ application-secret.yml 생성 완료"
+          echo "📄 파일 내용:"
+          cat src/main/resources/application-secret.yml
+          echo "📁 디렉토리 내용:"
+          ls -la src/main/resources/ | grep application
       - name: Docker Buildx 설치
         uses: docker/setup-buildx-action@v2
       - name: 레지스트리 로그인
