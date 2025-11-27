@@ -1,5 +1,6 @@
 package com.back.global.security
 
+import com.back.global.appConfig.SiteProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -19,7 +20,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class SecurityConfig(
     private val customAuthenticationFilter: CustomAuthenticationFilter,
     private val customOAuth2LoginSuccessHandler: CustomOAuth2LoginSuccessHandler,
-    private val customOAuth2AuthorizationRequestResolver: CustomOAuth2AuthorizationRequestResolver
+    private val customOAuth2AuthorizationRequestResolver: CustomOAuth2AuthorizationRequestResolver,
+    private val siteProperties: SiteProperties
 ) {
 
     @Bean
@@ -97,13 +99,7 @@ class SecurityConfig(
     fun corsConfigurationSource(): UrlBasedCorsConfigurationSource {
         val configuration = CorsConfiguration().apply {
             allowedOrigins =
-                listOf(
-                    "https://cdpn.io",
-                    "http://localhost:3000",
-                    "https://mypractice.store",
-                    "https://www.mypractice.store",
-                    "https://*.vercel.app"  // Vercel preview 배포도 허용
-                )
+                listOf("https://cdpn.io", siteProperties.frontUrl)
             allowedMethods =
                 listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
             allowedHeaders = listOf("*")

@@ -1,18 +1,17 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://mysql_1:3306/app_prod?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
     username: appuser
     password: lldj123414
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        format_sql: true
-        highlight_sql: true
-        use_sql_comments: true
-        default_batch_fetch_size: 100
+        format_sql: false
+        highlight_sql: false
+        use_sql_comments: false
   data:
     redis:
       host: redis_1
@@ -21,11 +20,14 @@ spring:
 
 logging:
   level:
-    root: INFO
-    com.rest1: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
+    com.back: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
+    org.hibernate.orm.jdbc.extract: WARN
+    org.springframework.transaction.interceptor: WARN
 
 custom:
-  jwt:
-    secretPattern: ${CUSTOM_JWT_SECRET_PATTERN}
+  site:
+    domain: "${custom.prod.domain}"
+    backUrl: "${custom.prod.backUrl}"
+    frontUrl: "${custom.prod.frontUrl}"
