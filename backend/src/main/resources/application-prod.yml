@@ -25,3 +25,7 @@ logging:
     com.rest1: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+
+custom:
+  jwt:
+    secretPattern: ${CUSTOM_JWT_SECRET_PATTERN}
