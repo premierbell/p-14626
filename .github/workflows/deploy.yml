@@ -65,6 +65,15 @@ jobs:
           cat src/main/resources/application-secret.yml
           echo "📁 디렉토리 내용:"
           ls -la src/main/resources/ | grep application
+
+      - name: Docker 빌드 전 파일 확인
+        run: |
+          echo "🔍 루트에서 확인:"
+          ls -la backend/src/main/resources/ | grep application
+          echo "📄 application-secret.yml 내용 (루트 기준):"
+          cat backend/src/main/resources/application-secret.yml
+        working-directory: .
+
       - name: Docker Buildx 설치
         uses: docker/setup-buildx-action@v2
       - name: 레지스트리 로그인
