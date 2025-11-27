@@ -108,8 +108,9 @@ class SecurityConfig(
         val configuration = CorsConfiguration().apply {
             allowedOrigins = listOf(
                 "https://cdpn.io",
-                siteProperties.frontUrl,  // https://mypractice.store
-                "https://www.${siteProperties.domain}"  // https://www.mypractice.store
+                siteProperties.frontUrl,
+                "https://mypractice.store",
+                "https://www.mypractice.store"
             )
             allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
             allowedHeaders = listOf("*")
