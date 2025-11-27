@@ -1,9 +1,13 @@
 spring:
+  profiles:
+    active: prod
+
   datasource:
     url: jdbc:mysql://mysql_1:3306/app_prod?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
     username: appuser
     password: lldj123414
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -12,6 +16,7 @@ spring:
         format_sql: false
         highlight_sql: false
         use_sql_comments: false
+
   data:
     redis:
       host: redis_1
@@ -27,6 +32,11 @@ logging:
     org.springframework.transaction.interceptor: WARN
 
 custom:
+  prod:
+    domain: "mypractice.store"
+    backUrl: "https://api.mypractice.store"
+    frontUrl: "https://mypractice.store"
+
   site:
     domain: "${custom.prod.domain}"
     backUrl: "${custom.prod.backUrl}"

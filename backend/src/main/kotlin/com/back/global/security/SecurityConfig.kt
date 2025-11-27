@@ -26,8 +26,8 @@ class SecurityConfig(
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
-
         http {
+            // URL 권한 설정
             authorizeHttpRequests {
                 authorize("/favicon.ico", permitAll)
                 authorize("/h2-console/**", permitAll)
@@ -43,69 +43,74 @@ class SecurityConfig(
                 authorize(anyRequest, permitAll)
             }
 
+            // CSRF 비활성화
             csrf { disable() }
 
+            // X-Frame-Options
             headers {
                 frameOptions { sameOrigin = true }
             }
 
+            // 커스텀 필터
             addFilterBefore<UsernamePasswordAuthenticationFilter>(customAuthenticationFilter)
+
+            // 세션 Stateless
             sessionManagement {
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
 
+            // OAuth2 Login
             oauth2Login {
-                authenticationSuccessHandler = customOAuth2LoginSuccessHandler
                 authorizationEndpoint {
                     authorizationRequestResolver = customOAuth2AuthorizationRequestResolver
                 }
+                redirectionEndpoint {
+                    // siteProperties.backUrl 기반으로 dev/prod 구분
+                    baseUri = "${siteProperties.backUrl}/login/oauth2/code/*"
+                }
+                authenticationSuccessHandler = customOAuth2LoginSuccessHandler
             }
 
+            // 예외 처리
             exceptionHandling {
                 authenticationEntryPoint = AuthenticationEntryPoint { _, response, _ ->
-                    response.contentType =
-                        "application/json; charset=UTF-8"
+                    response.contentType = "application/json; charset=UTF-8"
                     response.status = 401
                     response.writer.write(
                         """
-                            {
-                                "resultCode": "401-1",
-                                "msg": "로그인 후 이용해주세요."
-                            }
-                            """.trimIndent()
+                        {
+                            "resultCode": "401-1",
+                            "msg": "로그인 후 이용해주세요."
+                        }
+                        """.trimIndent()
                     )
                 }
-
                 accessDeniedHandler = AccessDeniedHandler { _, response, _ ->
-                    response.contentType =
-                        "application/json; charset=UTF-8"
+                    response.contentType = "application/json; charset=UTF-8"
                     response.status = 403
                     response.writer.write(
                         """
-                            {
-                                "resultCode": "403-1",
-                                "msg": "권한이 없습니다."
-                            }
+                        {
+                            "resultCode": "403-1",
+                            "msg": "권한이 없습니다."
+                        }
                         """.trimIndent()
                     )
                 }
             }
         }
-
         return http.build()
     }
 
+    // CORS 설정
     @Bean
     fun corsConfigurationSource(): UrlBasedCorsConfigurationSource {
         val configuration = CorsConfiguration().apply {
-            allowedOrigins =
-                listOf("https://cdpn.io", siteProperties.frontUrl)
-            allowedMethods =
-                listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+            allowedOrigins = listOf(siteProperties.frontUrl)
+            allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
             allowedHeaders = listOf("*")
             allowCredentials = true
         }
-
         return UrlBasedCorsConfigurationSource().apply {
             registerCorsConfiguration("/api/**", configuration)
         }
