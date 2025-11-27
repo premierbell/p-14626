@@ -48,8 +48,8 @@ class ApiV1AdmMemberControllerTest {
 
         resultActions
             .andExpect(MockMvcResultMatchers.jsonPath("$.content.length()").value(5))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].id", Matchers.containsInRelativeOrder(8, 1)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.content[*].id", Matchers.containsInRelativeOrder(8, 4)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].id").value(8))
             .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].createDate").exists())
             .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].modifyDate").exists())
             .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].nickname").value("시스템"))
