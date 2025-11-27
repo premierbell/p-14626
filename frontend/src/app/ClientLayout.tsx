@@ -50,7 +50,7 @@ export default function ClientLayout({
           <Link href="/posts">글 목록</Link>
           {!isLogin && <Link href="/members/login">로그인</Link>}
           {!isLogin && (
-            <Link href="http://localhost:8080/oauth2/authorization/kakao">
+            <Link href={`${process.env.NEXT_PUBLIC_API_BASE_URL}/oauth2/authorization/kakao`}>
               카카오 로그인
             </Link>
           )}
