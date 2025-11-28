@@ -31,6 +31,7 @@ class SecurityConfig(
             authorizeHttpRequests {
                 authorize("/favicon.ico", permitAll)
                 authorize("/h2-console/**", permitAll)
+                authorize("/actuator/**", permitAll)
                 authorize(HttpMethod.GET, "/api/*/posts", permitAll)
                 authorize(HttpMethod.GET, "/api/*/posts/{id:\\d+}", permitAll)
                 authorize(HttpMethod.GET, "/api/*/posts/{postId:\\d+}/comments", permitAll)
