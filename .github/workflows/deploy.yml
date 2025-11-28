@@ -96,7 +96,7 @@ jobs:
           JWT_SECRET=$(echo "$APPLICATION_SECRET" | grep 'secretPattern:' | awk '{print $2}')
           echo "jwt_secret=$JWT_SECRET" >> $GITHUB_OUTPUT
 
-      - name: AWS SSM Send-Command
+      - name: Blue-Green 무중단 배포
         uses: peterkimzz/aws-ssm-send-command@master
         id: ssm
         with:
@@ -105,13 +105,75 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           instance-ids: ${{ secrets.EC2_INSTANCE_ID }}
           working-directory: /
-          comment: Deploy
+          comment: Blue-Green Deploy
           command: |
-            docker pull ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest && \
-            docker stop app1 2>/dev/null || true && \
-            docker rm app1 2>/dev/null || true && \
-            docker run -d --name app1 --network common -p 8080:8080 \
+            # 이미지 pull
+            docker pull ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest
+
+            # 현재 실행 중인 컨테이너 확인
+            if docker ps | grep -q app1_1; then
+              CURRENT_CONTAINER="app1_1"
+              NEW_CONTAINER="app1_2"
+              NEW_PORT="8081"
+            else
+              CURRENT_CONTAINER="app1_2"
+              NEW_CONTAINER="app1_1"
+              NEW_PORT="8080"
+            fi
+
+            echo "현재 컨테이너: $CURRENT_CONTAINER"
+            echo "새 컨테이너: $NEW_CONTAINER"
+
+            # 새 컨테이너 중지 및 삭제 (있다면)
+            docker stop $NEW_CONTAINER 2>/dev/null || true
+            docker rm $NEW_CONTAINER 2>/dev/null || true
+
+            # 새 버전 컨테이너 시작
+            docker run -d \
+              --name $NEW_CONTAINER \
+              --network common \
+              -p $NEW_PORT:8080 \
+              -e TZ=Asia/Seoul \
               -e CUSTOM_JWT_SECRET_PATTERN='${{ steps.extract_secret.outputs.jwt_secret }}' \
               -e KAKAO_CLIENT_ID='${{ secrets.KAKAO_CLIENT_ID }}' \
-              ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest && \
+              ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest
+
+            # 헬스체크 대기 (최대 60초)
+            echo "새 컨테이너 헬스체크 시작..."
+            START_TIME=$(date +%s)
+
+            while true; do
+              HEALTH_STATUS=$(docker exec $NEW_CONTAINER curl -s http://localhost:8080/actuator/health 2>/dev/null || echo "")
+
+              if echo "$HEALTH_STATUS" | grep -q '"status":"UP"'; then
+                echo "새 컨테이너가 정상적으로 시작되었습니다!"
+                break
+              fi
+
+              CURRENT_TIME=$(date +%s)
+              ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
+
+              if [ $ELAPSED_TIME -ge 60 ]; then
+                echo "에러: 60초 내에 컨테이너가 시작되지 않았습니다."
+                docker logs $NEW_CONTAINER
+                exit 1
+              fi
+
+              echo "헬스체크 대기 중... ($ELAPSED_TIME초 경과)"
+              sleep 5
+            done
+
+            # HAProxy가 새 컨테이너를 감지할 시간 대기
+            echo "HAProxy가 새 컨테이너를 감지할 때까지 대기 중..."
+            sleep 5
+
+            # 기존 컨테이너 중지 및 삭제
+            echo "기존 컨테이너 $CURRENT_CONTAINER 중지 중..."
+            docker stop $CURRENT_CONTAINER 2>/dev/null || true
+            docker rm $CURRENT_CONTAINER 2>/dev/null || true
+
+            # 사용하지 않는 이미지 정리
             docker image prune -f
+
+            echo "Blue-Green 배포 완료!"
+            echo "활성 컨테이너: $NEW_CONTAINER"

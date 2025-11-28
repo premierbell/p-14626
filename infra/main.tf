@@ -237,6 +237,41 @@ CREATE DATABASE app_prod;
 FLUSH PRIVILEGES;
 "
 
+# HAProxy 설정 디렉토리 생성
+mkdir -p /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy
+
+# HAProxy 설정 파일 생성
+cat > /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy/haproxy.cfg <<'HAPROXY_CFG'
+defaults
+    mode http
+    timeout connect 5s
+    timeout client 60s
+    timeout server 60s
+
+frontend http_front
+    bind *:8090
+    default_backend http_back
+
+backend http_back
+    balance roundrobin
+    option httpchk GET /actuator/health
+    default-server inter 2s rise 1 fall 1
+    option redispatch
+
+    server app_server_1 app1_1:8080 check
+    server app_server_2 app1_2:8080 check
+HAPROXY_CFG
+
+# HAProxy 컨테이너 실행
+docker run -d \
+  --name ha_proxy_1 \
+  --restart unless-stopped \
+  --network common \
+  -p 8090:8090 \
+  -v /dockerProjects/ha_proxy_1/volumes/usr/local/etc/haproxy:/usr/local/etc/haproxy \
+  -e TZ=Asia/Seoul \
+  haproxy
+
 END_OF_FILE
 }
 
